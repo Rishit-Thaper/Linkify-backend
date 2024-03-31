@@ -5,6 +5,7 @@ import { User } from "../models/userModel.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { ObjectId } from "mongodb";
+
 // @desc    Get user profile
 const getProfile = asyncHandler(async (req, res) => {
   const profile = await Profile.findOne({ user_id: req.user._id });
@@ -135,6 +136,7 @@ const getCompleteProfile = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, profile, "User's Complete Profile"));
 });
 
+// @desc getCompletePublicProfile with Links
 const getCompletePublicProfile = asyncHandler(async (req, res) => {
   const userId = String(req.params.id);
   const objectId = new ObjectId(userId);
@@ -172,6 +174,7 @@ const getCompletePublicProfile = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, profile, "User's Complete Profile"));
 });
+
 export {
   getProfile,
   createProfile,
