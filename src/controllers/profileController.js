@@ -133,10 +133,47 @@ const getCompleteProfile = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, profile, "User's Complete Profile"));
 });
 
+
+const getCompletePublicProfile = asyncHandler(async(req, res)=>{
+  const userId = req.params.id;
+  const profile = await Profile.aggregate([
+    {
+      $match: {
+        user_id: userId,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "users",
+      },
+    },
+    {
+      $lookup: {
+        from: "links",
+        localField: "user_id",
+        foreignField: "user_id",
+        as: "links",
+      },
+    },
+  ]);
+
+  console.log(profile);
+
+  if (!profile) {
+    throw new ApiError(400, "Invalid ID");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, profile, "User's Complete Profile"));
+})
 export {
   getProfile,
   createProfile,
   updateProfile,
   updateUserAvatar,
   getCompleteProfile,
+  getCompletePublicProfile
 };
