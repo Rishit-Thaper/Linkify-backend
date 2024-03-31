@@ -6,12 +6,12 @@ const router = Router();
 
 router.route("/getAllLinks").get(verifyJWT, getAllLinks);
 
-router.route("/getSingleLink").get(verifyJWT, singleLink);
+router.route("/getSingleLink/:id").get(verifyJWT, singleLink);
 
 router.route("/createLink").post(verifyJWT, createLink);
 
-router.route("/updateLink").patch(verifyJWT, updateLink);
+router.route("/updateLink/:id").patch(verifyJWT, updateLink);
 
-router.route("/deleteLink").delete(verifyJWT, deleteLink);
+router.route("/deleteLink/:id").delete(verifyJWT, deleteLink);
 
 export default router;

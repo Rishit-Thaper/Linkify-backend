@@ -11,5 +11,5 @@ import linkRouter from "./routes/linkRoutes.js";
 import profileRouter from "./routes/profileRoutes.js";
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/profile", profileRouter);
-app.use("api/v1/links", linkRouter);
+app.use("/api/v1/links", linkRouter);
 export { app };

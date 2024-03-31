@@ -18,7 +18,7 @@ router.route("/getProfile").get(verifyJWT, getProfile);
 router.route("/getCompleteProfile").get(verifyJWT, getCompleteProfile);
 
 // public profile which will be shareable
-router.route("/getPublicProfile").get(getCompletePublicProfile);
+router.route("/getPublicProfile/:id").get(getCompletePublicProfile);
 
 router.route("/createProfile").post(verifyJWT, upload.single("avatar"), createProfile);
 

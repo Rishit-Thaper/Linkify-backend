@@ -4,7 +4,7 @@ import { uploadOnCLoudinary } from "../utils/cloudinary.js";
 import { User } from "../models/userModel.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
-
+import { ObjectId } from "mongodb";
 // @desc    Get user profile
 const getProfile = asyncHandler(async (req, res) => {
   const profile = await Profile.findOne({ user_id: req.user._id });
@@ -99,43 +99,8 @@ const updateProfile = asyncHandler(async (req, res) => {
 
 // @desc getCompleteProfile with Links
 const getCompleteProfile = asyncHandler(async (req, res) => {
-  const profile = await Profile.aggregate([
-    {
-      $match: {
-        user_id: req.user._id,
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "user_id",
-        foreignField: "_id",
-        as: "users",
-      },
-    },
-    {
-      $lookup: {
-        from: "links",
-        localField: "user_id",
-        foreignField: "user_id",
-        as: "links",
-      },
-    },
-  ]);
-
-  console.log(profile);
-
-  if (!profile) {
-    throw new ApiError(400, "Invalid ID");
-  }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, profile, "User's Complete Profile"));
-});
-
-
-const getCompletePublicProfile = asyncHandler(async(req, res)=>{
-  const userId = req.params.id;
+  const userId = req.user._id;
+  console.log(userId);
   const profile = await Profile.aggregate([
     {
       $match: {
@@ -168,12 +133,50 @@ const getCompletePublicProfile = asyncHandler(async(req, res)=>{
   return res
     .status(200)
     .json(new ApiResponse(200, profile, "User's Complete Profile"));
-})
+});
+
+const getCompletePublicProfile = asyncHandler(async (req, res) => {
+  const userId = String(req.params.id);
+  const objectId = new ObjectId(userId);
+  console.log(objectId);
+  const profile = await Profile.aggregate([
+    {
+      $match: {
+        user_id: objectId,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "users",
+      },
+    },
+    {
+      $lookup: {
+        from: "links",
+        localField: "user_id",
+        foreignField: "user_id",
+        as: "links",
+      },
+    },
+  ]);
+
+  console.log(profile);
+
+  if (!profile) {
+    throw new ApiError(400, "Invalid ID");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, profile, "User's Complete Profile"));
+});
 export {
   getProfile,
   createProfile,
   updateProfile,
   updateUserAvatar,
   getCompleteProfile,
-  getCompletePublicProfile
+  getCompletePublicProfile,
 };
