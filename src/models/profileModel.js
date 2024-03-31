@@ -4,15 +4,11 @@ const profileSchema = new Schema({
     type: String,
     required: true,
   },
-  phone_number: {
-    type: String,
-    required: true,
-  },
-  birthdate: {
+  dateOfBirth: {
     type: Date,
     required: true,
   },
-  profile_picture: {
+  avatar: {
     type: String,
     required: true,
   },

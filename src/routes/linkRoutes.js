@@ -1,0 +1,1 @@
+import { getAllLinks, updateLink, deleteLink, createLink, singleLink } from "../controllers/linkController.js";
