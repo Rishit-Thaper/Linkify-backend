@@ -8,7 +8,7 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     const token = req.header("Authorization").replace("Bearer ", "");
     // console.log(token);
     if (!token) {
-      throw new ApiError(401, "Unauthorized Access");
+      return res.status(401).json(new ApiError(401, "Unauthorised request"));    
     }
 
     const decodedUser = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -18,14 +18,14 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     // console.log(user);
 
     if (!user) {
-      throw new ApiError(401, "Invalid user token");
+      return res.status(400).json(new ApiError(400, "User don't exist"));    
     }
 
     req.user = user;
 
     next();
   } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid access token");
+    return res.status(401).json(new ApiError(401, error?.message || "Invalid access token"));    
   }
 });
 

@@ -7,7 +7,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 const getAllLinks = asyncHandler(async (req, res) => {
   const links = await Link.find({ user_id: req.user._id });
   if (!links) {
-    throw new ApiError(404, "No links found");
+    return res.status(400).json(new ApiError(400, "Link not found"));
   }
   return res.status(200).json(new ApiResponse(200, links, "Links found"));
 });
@@ -22,7 +22,7 @@ const createLink = asyncHandler(async (req, res) => {
     user_id: userId,
   });
   if (!link) {
-    throw new ApiError(400, "Link not created");
+    return res.status(400).json(new ApiError(400, "Link not created"));
   }
   return res.status(200).json(new ApiResponse(200, link, "Link Created"));
 });
@@ -40,7 +40,7 @@ const updateLink = asyncHandler(async (req, res) => {
     { new: true }
   );
   if (!updateLink) {
-    throw new ApiError(400, "Link not updated");
+    return res.status(400).json(new ApiError(400, "Link not updated"));
   }
   return res.status(200).json(new ApiResponse(200, updateLink, "Link Updated"));
 });
@@ -50,7 +50,7 @@ const deleteLink = asyncHandler(async (req, res) => {
   const linkId = req.params.id;
   const deleteLink = await Link.findByIdAndDelete({ _id: linkId });
   if (!deleteLink) {
-    throw new ApiError(400, "Invalid ID");
+    return res.status(400).json(new ApiError(400, "Invalid Link"));
   }
   return res
     .status(200)
@@ -62,7 +62,7 @@ const singleLink = asyncHandler(async (req, res) => {
   const linkId = req.params.id;
   const link = await Link.findById({ _id: linkId });
   if (!link) {
-    throw new ApiError(400, "Link not found");
+    return res.status(400).json(new ApiError(400, "Link not found"));
   }
   return res
     .status(200)

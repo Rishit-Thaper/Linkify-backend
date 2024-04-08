@@ -7,17 +7,19 @@ import validator from "validator";
 const generateToken = async (user_id) => {
   try {
     if (!user_id) {
-      throw new ApiResponse(400, "User ID is required");
+      return res.status(400).json(new ApiError(400, "User ID is required"));
     }
     const user = await User.findById(user_id);
 
     if (!user) {
-      throw new ApiResponse(400, "User don't exist");
+      return res.status(400).json(new ApiError(400, "User don't exist"));
     }
     const token = await user.generateAccessToken();
     return token;
   } catch (error) {
-    throw new ApiResponse(500, "Something went wrong while generating token");
+    return res
+      .status(500)
+      .json(new ApiError(500, "Something went wrong while generating token"));
   }
 };
 
@@ -27,34 +29,31 @@ const registerUser = asyncHandler(async (req, res) => {
   console.log(email, username, password);
 
   if ([email, username, password].some((field) => field?.trim() === "")) {
-    throw new ApiError(400, "All fields are required");
+    return res.status(400).json(new ApiError(400, "All fields are required"));
   }
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    throw new ApiError(400, "User already exists");
-  }
-
-  if (!validator.isEmail(email)) {
-    throw new ApiError(400, "Invalid email");
-  }
-  if (!validator.isStrongPassword(password)) {
-    throw new ApiError(400, "Password is not strong enough");
+    return res.status(400).json(new ApiError(400, "User Already exists"));
   }
 
   const createdUser = await User.create({ email, username, password });
 
   if (!createdUser) {
-    throw new ApiError(500, "Something went wrong while creating user account");
+    return res
+      .status(500)
+      .json(
+        new ApiError(500, "Something went wrong while creating user account")
+      );
   }
-
+  const newUser = await User.findById(createdUser._id).select("-password");
   const accessToken = await generateToken(createdUser._id);
 
   return res.status(200).json(
     new ApiResponse(
       200,
       {
-        user: createdUser,
+        user: newUser,
         accessToken,
       },
       "User Successfully Created"
@@ -68,13 +67,13 @@ const loginUser = asyncHandler(async (req, res) => {
   const existingUser = await User.findOne({ email });
 
   if (!existingUser) {
-    throw new ApiError(400, "User not found");
+    return res.status(400).json(new ApiError(400, "User not found"));
   }
 
   const matchPassword = await existingUser.isPasswordCorrect(password);
 
   if (!matchPassword) {
-    throw new ApiError(400, "Incorrect User Credentials");
+    return res.status(400).json(new ApiError(400, "Incorrect credentials"));
   }
 
   const token = await generateToken(existingUser._id);

@@ -10,7 +10,7 @@ import { ObjectId } from "mongodb";
 const getProfile = asyncHandler(async (req, res) => {
   const profile = await Profile.findOne({ user_id: req.user._id });
   if (!profile) {
-    throw new ApiError(404, "Profile not found");
+    return res.status(400).json(new ApiError(400, "Profile not found"));
   }
   return res.status(200).json(new ApiResponse(200, profile, "Profile found"));
 });
@@ -23,7 +23,7 @@ const createProfile = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
   console.log(avatarLocalPath);
   if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar is required");
+    return res.status(400).json(new ApiError(400, "Avatar is required"));
   }
   const avatar = await uploadOnCLoudinary(avatarLocalPath);
   console.log(avatar.url);
@@ -31,7 +31,7 @@ const createProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const user = await User.findById(userId);
   if (!user) {
-    throw new ApiError(404, "User not found");
+    return res.status(400).json(new ApiError(400, "User not found"));
   }
 
   const profile = await Profile.create({
@@ -42,7 +42,7 @@ const createProfile = asyncHandler(async (req, res) => {
   });
 
   if (!profile) {
-    throw new ApiError(400, "Profile not created");
+    return res.status(400).json(new ApiError(400, "Profile not created"));
   }
 
   return res.status(200).json(new ApiResponse(200, profile, "Profile Created"));
@@ -53,7 +53,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
   console.log(avatarLocalPath);
   if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar is required");
+    return res.status(400).json(new ApiError(400, "Avatar is required"));
   }
   const avatar = await uploadOnCLoudinary(avatarLocalPath);
   const userId = req.user._id;
@@ -66,7 +66,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   );
 
   if (!profile) {
-    throw new ApiError(400, "Avatar not updated");
+    return res.status(400).json(new ApiError(400, "Avatar not updated"));
   }
 
   return res.status(200).json(new ApiResponse(200, profile, "Avatar Updated"));
@@ -79,7 +79,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const user = await User.findById(userId);
   if (!user) {
-    throw new ApiError(404, "User not found");
+    return res.status(400).json(new ApiError(400, "User not found"));
   }
 
   const profile = await Profile.findOneAndUpdate(
@@ -92,7 +92,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   );
 
   if (!profile) {
-    throw new ApiError(400, "Profile not updated");
+    return res.status(400).json(new ApiError(400, "Profile not updated"));
   }
 
   return res.status(200).json(new ApiResponse(200, profile, "Profile Updated"));
@@ -129,7 +129,7 @@ const getCompleteProfile = asyncHandler(async (req, res) => {
   console.log(profile);
 
   if (!profile) {
-    throw new ApiError(400, "Invalid ID");
+    return res.status(400).json(new ApiError(400, "Invalid UserID"));
   }
   return res
     .status(200)
@@ -168,7 +168,7 @@ const getCompletePublicProfile = asyncHandler(async (req, res) => {
   console.log(profile);
 
   if (!profile) {
-    throw new ApiError(400, "Invalid ID");
+    return res.status(400).json(new ApiError(400, "Invalid User"));
   }
   return res
     .status(200)
