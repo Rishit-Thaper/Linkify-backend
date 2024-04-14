@@ -3,7 +3,6 @@ import {
   getProfile,
   updateProfile,
   createProfile,
-  updateUserAvatar,
   getCompleteProfile,
   getCompletePublicProfile
 } from "../controllers/profileController.js";
@@ -18,13 +17,14 @@ router.route("/getProfile").get(verifyJWT, getProfile);
 router.route("/getCompleteProfile").get(verifyJWT, getCompleteProfile);
 
 // public profile which will be shareable
-router.route("/getPublicProfile/:id").get(getCompletePublicProfile);
+// router.route("/getPublicProfile/:id").get(getCompletePublicProfile);
+router.route("/getPublicProfile/:username").get(getCompletePublicProfile);
+
 
 router.route("/createProfile").post(verifyJWT, upload.single("avatar"), createProfile);
 
-router.route("/updateProfile").patch(verifyJWT, updateProfile);
+router.route("/updateProfile").patch(verifyJWT, upload.single("avatar"),updateProfile);
 
-router.route("/updateAvatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 
 
 export default router;

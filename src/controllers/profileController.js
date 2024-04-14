@@ -21,7 +21,7 @@ const createProfile = asyncHandler(async (req, res) => {
   console.log(req.body);
   console.log(req.file);
   const avatarLocalPath = req.file?.path;
-  console.log(avatarLocalPath);
+  console.log("Local Path", avatarLocalPath);
   if (!avatarLocalPath) {
     return res.status(400).json(new ApiError(400, "Avatar is required"));
   }
@@ -48,46 +48,33 @@ const createProfile = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, profile, "Profile Created"));
 });
 
-// @desc    Update user avatar
-const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarLocalPath = req.file?.path;
-  console.log(avatarLocalPath);
-  if (!avatarLocalPath) {
-    return res.status(400).json(new ApiError(400, "Avatar is required"));
-  }
-  const avatar = await uploadOnCLoudinary(avatarLocalPath);
-  const userId = req.user._id;
-  const profile = await Profile.findOneAndUpdate(
-    { user_id: userId },
-    {
-      avatar: avatar.url,
-    },
-    { new: true }
-  );
-
-  if (!profile) {
-    return res.status(400).json(new ApiError(400, "Avatar not updated"));
-  }
-
-  return res.status(200).json(new ApiResponse(200, profile, "Avatar Updated"));
-});
 // @desc    Update user profile
 const updateProfile = asyncHandler(async (req, res) => {
   const { bio, dateOfBirth } = req.body;
-  console.log(req.body);
-
+  const avatarLocalPath = req.file?.path;
+  console.log("Request", req.body);
+  console.log("avatar", avatarLocalPath);
   const userId = req.user._id;
   const user = await User.findById(userId);
   if (!user) {
     return res.status(400).json(new ApiError(400, "User not found"));
   }
 
+  let updatedFields = {};
+  if (avatarLocalPath) {
+    const avatar = await uploadOnCLoudinary(avatarLocalPath);
+    updatedFields.avatar = avatar.url;
+  }
+  if (bio !== undefined) {
+    updatedFields.bio = bio;
+  }
+  if (dateOfBirth !== undefined) {
+    updatedFields.dateOfBirth = dateOfBirth;
+  }
+  console.log("updated", updatedFields);
   const profile = await Profile.findOneAndUpdate(
     { user_id: userId },
-    {
-      bio,
-      dateOfBirth,
-    },
+    updatedFields,
     { new: true }
   );
 
@@ -138,27 +125,25 @@ const getCompleteProfile = asyncHandler(async (req, res) => {
 
 // @desc getCompletePublicProfile with Links
 const getCompletePublicProfile = asyncHandler(async (req, res) => {
-  const userId = String(req.params.id);
-  const objectId = new ObjectId(userId);
-  console.log(objectId);
-  const profile = await Profile.aggregate([
+  const username = req.params.username;
+  const profile = await User.aggregate([
     {
       $match: {
-        user_id: objectId,
+        username: username,
       },
     },
     {
       $lookup: {
-        from: "users",
-        localField: "user_id",
-        foreignField: "_id",
-        as: "users",
+        from: "profiles",
+        localField: "_id",
+        foreignField: "user_id",
+        as: "profile",
       },
     },
     {
       $lookup: {
         from: "links",
-        localField: "user_id",
+        localField: "_id",
         foreignField: "user_id",
         as: "links",
       },
@@ -179,7 +164,6 @@ export {
   getProfile,
   createProfile,
   updateProfile,
-  updateUserAvatar,
   getCompleteProfile,
   getCompletePublicProfile,
 };
